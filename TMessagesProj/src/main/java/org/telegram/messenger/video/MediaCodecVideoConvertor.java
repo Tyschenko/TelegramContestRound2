@@ -24,6 +24,7 @@ import org.telegram.messenger.VideoEditedInfo;
 import org.telegram.messenger.video.audio_input.AudioInput;
 import org.telegram.messenger.video.audio_input.BlankAudioInput;
 import org.telegram.messenger.video.audio_input.GeneralAudioInput;
+import org.telegram.tgnet.AbstractSerializedData;
 import org.telegram.ui.Stories.recorder.CollageLayout;
 import org.telegram.ui.Stories.recorder.StoryEntry;
 
@@ -1518,7 +1519,7 @@ public class MediaCodecVideoConvertor {
 
     public static class MixedSoundInfo {
 
-        final String audioFile;
+        public String audioFile;
         public float volume = 1f;
         public long audioOffset;
         public long startTime;
@@ -1526,6 +1527,22 @@ public class MediaCodecVideoConvertor {
 
         public MixedSoundInfo(String file) {
             this.audioFile = file;
+        }
+
+        public void serializeTo(AbstractSerializedData data) {
+            data.writeString(audioFile);
+            data.writeFloat(volume);
+            data.writeInt64(audioOffset);
+            data.writeInt64(startTime);
+            data.writeInt64(duration);
+        }
+
+        public MixedSoundInfo(AbstractSerializedData data, boolean exception) {
+            audioFile = data.readString(exception);
+            volume = data.readFloat(exception);
+            audioOffset = data.readInt64(exception);
+            startTime = data.readInt64(exception);
+            duration = data.readInt64(exception);
         }
     }
 

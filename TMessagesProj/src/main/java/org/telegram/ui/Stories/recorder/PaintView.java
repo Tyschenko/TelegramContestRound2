@@ -2624,10 +2624,10 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
 
     @Override
     public Bitmap getBitmap(ArrayList<VideoEditedInfo.MediaEntity> entities, Bitmap[] thumbBitmap) {
-        return getBitmap(entities, (int) paintingSize.width, (int) paintingSize.height, true, true, false, false, null);
+        return getBitmap(entities, (int) paintingSize.width, (int) paintingSize.height, true, true, false, false, null, false);
     }
 
-    public Bitmap getBitmap(ArrayList<VideoEditedInfo.MediaEntity> entities, int resultWidth, int resultHeight, boolean drawPaint, boolean drawEntities, boolean drawMessage, boolean drawBlur, StoryEntry entry) {
+    public Bitmap getBitmap(ArrayList<VideoEditedInfo.MediaEntity> entities, int resultWidth, int resultHeight, boolean drawPaint, boolean drawEntities, boolean drawMessage, boolean drawBlur, StoryEntry entry, boolean isFromChat) {
         Bitmap bitmap;
         if (drawPaint) {
             bitmap = renderView.getResultBitmap(false, drawBlur);
@@ -2717,6 +2717,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                         mediaEntity.textTypeface = textPaintView.getTypeface();
                         mediaEntity.textAlign = textPaintView.getAlign();
                     } else if (entity instanceof StickerView) {
+                        drawThisEntity = !isFromChat; // Don't draw sticker here, otherwise it will be rendered twice: once as a static image, once as a video
                         mediaEntity.type = VideoEditedInfo.MediaEntity.TYPE_STICKER;
                         StickerView stickerView = (StickerView) entity;
                         Size size = stickerView.getBaseSize();
@@ -2816,7 +2817,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                             }
                             mediaEntity.entities.add(tlentity);
                         }
-                        drawThisEntity = false;
+                        drawThisEntity = isFromChat;
                     } else if (entity instanceof LinkView) {
                         LinkView linkView = (LinkView) entity;
                         mediaEntity.type = VideoEditedInfo.MediaEntity.TYPE_LINK;
@@ -2842,7 +2843,7 @@ public class PaintView extends SizeNotifierFrameLayoutPhoto implements IPhotoPai
                         ((TL_stories.TL_mediaAreaUrl) mediaEntity.mediaArea).url = linkView.link.webpage != null && !TextUtils.isEmpty(linkView.link.webpage.url) ? linkView.link.webpage.url : linkView.link.url;
                         mediaEntity.mediaArea.coordinates = new TL_stories.TL_mediaAreaCoordinates();
                     } else if (entity instanceof ReactionWidgetEntityView) {
-                        skipDrawToBitmap = true;
+                        skipDrawToBitmap = !isFromChat;
                         ReactionWidgetEntityView reactionView = (ReactionWidgetEntityView) entity;
                         mediaEntity.type = VideoEditedInfo.MediaEntity.TYPE_REACTION;
                         mediaEntity.mediaArea = new TL_stories.TL_mediaAreaSuggestedReaction();

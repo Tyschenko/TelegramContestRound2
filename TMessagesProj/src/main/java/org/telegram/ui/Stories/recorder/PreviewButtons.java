@@ -1,6 +1,7 @@
 package org.telegram.ui.Stories.recorder;
 
 import static org.telegram.messenger.AndroidUtilities.dp;
+import static org.telegram.ui.ActionBar.Theme.RIPPLE_MASK_CIRCLE_20DP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -46,16 +47,19 @@ public class PreviewButtons extends FrameLayout {
     public static final int BUTTON_STICKER = 2;
     public static final int BUTTON_ADJUST = 3;
     public static final int BUTTON_SHARE = 4;
+    public static final int BUTTON_TTL = 5;
 
     private View shadowView;
 
     private ArrayList<ButtonView> buttons = new ArrayList<>();
     public ShareButtonView shareButton;
+    public ButtonView ttlButton;
+    private CaptionContainerView.PeriodDrawable timerDrawable;
 
     private String shareText;
     private boolean shareArrow = true;
 
-    public PreviewButtons(Context context) {
+    public PreviewButtons(Context context, boolean showTtlButton) {
         super(context);
 
         shadowView = new View(context);
@@ -66,6 +70,10 @@ public class PreviewButtons extends FrameLayout {
         addButton(BUTTON_STICKER, R.drawable.msg_photo_sticker, LocaleController.getString(R.string.AccDescrStickers));
         addButton(BUTTON_TEXT, R.drawable.msg_photo_text2, LocaleController.getString(R.string.AccDescrPlaceText));
         addButton(BUTTON_ADJUST, R.drawable.msg_photo_settings, LocaleController.getString(R.string.AccDescrPhotoAdjust));
+        if (showTtlButton) {
+            addTtlButton();
+            ttlButton = buttons.get(4);
+        }
 
         shareButton = new ShareButtonView(context, shareText = LocaleController.getString(R.string.Send), shareArrow = true);
         shareButton.setContentDescription(LocaleController.getString(R.string.Send));
@@ -104,11 +112,28 @@ public class PreviewButtons extends FrameLayout {
         updateAppearT();
     }
 
+    public void setTimerText(int timer, int SHOW_ONCE) {
+        if (timerDrawable != null) {
+            timerDrawable.setValue(timer == SHOW_ONCE ? 1 : Math.max(1, timer), timer > 0, true);
+        }
+    }
+
+    public int getButtonTtlRight() {
+        return ttlButton.getRight();
+    }
+
     private void addButton(int id, int resId, CharSequence contentDescription) {
         ButtonView btn = new ButtonView(getContext(), id, resId);
         btn.setContentDescription(contentDescription);
         buttons.add(btn);
         addView(btn);
+    }
+
+    private void addTtlButton() {
+        ButtonView timerButton = new ButtonView(getContext(), BUTTON_TTL, timerDrawable = new CaptionContainerView.PeriodDrawable());
+        timerButton.setBackground(Theme.createSelectorDrawable(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR, RIPPLE_MASK_CIRCLE_20DP, dp(18)));
+        buttons.add(timerButton);
+        addView(timerButton);
     }
 
     @Override
@@ -210,7 +235,7 @@ public class PreviewButtons extends FrameLayout {
         }
     }
 
-    private class ShareButtonView extends View {
+    class ShareButtonView extends View {
 
         private final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         private final Paint buttonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -359,6 +384,21 @@ public class PreviewButtons extends FrameLayout {
             setScaleType(ScaleType.CENTER);
             setImageResource(resId);
             setColorFilter(new PorterDuffColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY));
+
+            setOnClickListener(e -> {
+                if (appearing && onClickListener != null) {
+                    onClickListener.run(id);
+                }
+            });
+        }
+
+        public ButtonView(Context context, int id, Drawable drawable) {
+            super(context);
+            this.id = id;
+
+            setBackground(Theme.createSelectorDrawable(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR));
+            setScaleType(ScaleType.CENTER);
+            setImageDrawable(drawable);
 
             setOnClickListener(e -> {
                 if (appearing && onClickListener != null) {

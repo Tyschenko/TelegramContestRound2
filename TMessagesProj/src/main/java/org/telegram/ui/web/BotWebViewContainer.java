@@ -2222,7 +2222,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                                         thumb = null;
                                     }
                                 }
-                                entry = StoryEntry.fromVideoShoot(file, thumb == null ? null : thumb.getAbsolutePath(), params[AnimatedFileDrawable.PARAM_NUM_DURATION]);
+                                entry = StoryEntry.fromVideoShoot(file, thumb == null ? null : thumb.getAbsolutePath(), params[AnimatedFileDrawable.PARAM_NUM_DURATION], false);
                                 entry.width = width;
                                 entry.height = height;
                                 entry.setupMatrix();

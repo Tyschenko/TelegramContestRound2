@@ -35,13 +35,75 @@ import org.telegram.ui.Stories.recorder.StoryEntry;
 import org.telegram.ui.Stories.recorder.Weather;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class VideoEditedInfo {
+
+    @Override
+    public String toString() {
+        return "VideoEditedInfo{" +
+                "startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", avatarStartTime=" + avatarStartTime +
+                ", start=" + start +
+                ", end=" + end +
+                ", compressQuality=" + compressQuality +
+                ", rotationValue=" + rotationValue +
+                ", originalWidth=" + originalWidth +
+                ", originalHeight=" + originalHeight +
+                ", originalBitrate=" + originalBitrate +
+                ", resultWidth=" + resultWidth +
+                ", resultHeight=" + resultHeight +
+                ", bitrate=" + bitrate +
+                ", framerate=" + framerate +
+                ", originalPath='" + originalPath + '\'' +
+                ", estimatedSize=" + estimatedSize +
+                ", estimatedDuration=" + estimatedDuration +
+                ", roundVideo=" + roundVideo +
+                ", muted=" + muted +
+                ", volume=" + volume +
+                ", originalDuration=" + originalDuration +
+                ", file=" + file +
+                ", encryptedFile=" + encryptedFile +
+                ", key=" + Arrays.toString(key) +
+                ", iv=" + Arrays.toString(iv) +
+                ", filterState=" + filterState +
+                ", paintPath='" + paintPath + '\'' +
+                ", blurPath='" + blurPath + '\'' +
+                ", messagePath='" + messagePath + '\'' +
+                ", messageVideoMaskPath='" + messageVideoMaskPath + '\'' +
+                ", backgroundPath='" + backgroundPath + '\'' +
+                ", mediaEntities=" + mediaEntities +
+                ", cropState=" + cropState +
+                ", isPhoto=" + isPhoto +
+                ", isStory=" + isStory +
+                ", hdrInfo=" + hdrInfo +
+                ", collage=" + collage +
+                ", collageParts=" + collageParts +
+                ", isSticker=" + isSticker +
+                ", thumb=" + thumb +
+                ", notReadyYet=" + notReadyYet +
+                ", gradientTopColor=" + gradientTopColor +
+                ", gradientBottomColor=" + gradientBottomColor +
+                ", account=" + account +
+                ", isDark=" + isDark +
+                ", wallpaperPeerId=" + wallpaperPeerId +
+                ", forceFragmenting=" + forceFragmenting +
+                ", alreadyScheduledConverting=" + alreadyScheduledConverting +
+                ", canceled=" + canceled +
+                ", videoConvertFirstWrite=" + videoConvertFirstWrite +
+                ", needUpdateProgress=" + needUpdateProgress +
+                ", shouldLimitFps=" + shouldLimitFps +
+                ", fromCamera=" + fromCamera +
+                ", mixedSoundInfos=" + mixedSoundInfos +
+                '}';
+    }
 
     public long startTime;
     public long endTime;
@@ -131,6 +193,64 @@ public class VideoEditedInfo {
     }
 
     public static class MediaEntity {
+
+        @Override
+        public String toString() {
+            return "MediaEntity{" +
+                    "type=" + type +
+                    ", subType=" + subType +
+                    ", x=" + x +
+                    ", y=" + y +
+                    ", rotation=" + rotation +
+                    ", width=" + width +
+                    ", height=" + height +
+                    ", additionalWidth=" + additionalWidth +
+                    ", additionalHeight=" + additionalHeight +
+                    ", text='" + text + '\'' +
+                    ", entities=" + entities +
+                    ", color=" + color +
+                    ", fontSize=" + fontSize +
+                    ", textTypeface=" + textTypeface +
+                    ", textTypefaceKey='" + textTypefaceKey + '\'' +
+                    ", textAlign=" + textAlign +
+                    ", viewWidth=" + viewWidth +
+                    ", viewHeight=" + viewHeight +
+                    ", roundRadius=" + roundRadius +
+                    ", segmentedPath='" + segmentedPath + '\'' +
+                    ", scale=" + scale +
+                    ", textViewWidth=" + textViewWidth +
+                    ", textViewHeight=" + textViewHeight +
+                    ", textViewX=" + textViewX +
+                    ", textViewY=" + textViewY +
+                    ", customTextView=" + customTextView +
+                    ", document=" + document +
+                    ", parentObject=" + parentObject +
+                    ", metadata=" + Arrays.toString(metadata) +
+                    ", ptr=" + ptr +
+                    ", currentFrame=" + currentFrame +
+                    ", framesPerDraw=" + framesPerDraw +
+                    ", bitmap=" + bitmap +
+                    ", matrix=" + matrix +
+                    ", view=" + view +
+                    ", canvas=" + canvas +
+                    ", animatedFileDrawable=" + animatedFileDrawable +
+                    ", looped=" + looped +
+                    ", roundRadiusCanvas=" + roundRadiusCanvas +
+                    ", firstSeek=" + firstSeek +
+                    ", mediaArea=" + mediaArea +
+                    ", media=" + media +
+                    ", weather=" + weather +
+                    ", density=" + density +
+                    ", roundOffset=" + roundOffset +
+                    ", roundLeft=" + roundLeft +
+                    ", roundRight=" + roundRight +
+                    ", roundDuration=" + roundDuration +
+                    ", W=" + W +
+                    ", H=" + H +
+                    ", visibleReaction=" + visibleReaction +
+                    ", linkSettings=" + linkSettings +
+                    '}';
+        }
 
         public static final byte TYPE_STICKER = 0;
         public static final byte TYPE_TEXT = 1;
@@ -507,6 +627,10 @@ public class VideoEditedInfo {
                 serializedData.writeInt32(cropState.transformHeight);
                 serializedData.writeInt32(cropState.transformRotation);
                 serializedData.writeBool(cropState.mirrored);
+
+                float[] useMatrixFloatValues = new float[9];
+                cropState.useMatrix.getValues(useMatrixFloatValues);
+                serializedData.writeByteArray(convertFloatArrayToByteArray(useMatrixFloatValues));
             } else {
                 serializedData.writeByte(0);
             }
@@ -530,12 +654,38 @@ public class VideoEditedInfo {
             } else {
                 serializedData.writeInt32(TLRPC.TL_null.constructor);
             }
+            if (mixedSoundInfos != null && !mixedSoundInfos.isEmpty()) {
+                serializedData.writeByte(1);
+                serializedData.writeInt32(mixedSoundInfos.size());
+                for (int a = 0, N = mixedSoundInfos.size(); a < N; a++) {
+                    mixedSoundInfos.get(a).serializeTo(serializedData);
+                }
+            } else {
+                serializedData.writeByte(0);
+            }
             filters = Utilities.bytesToHex(serializedData.toByteArray());
             serializedData.cleanup();
         } else {
             filters = "";
         }
         return String.format(Locale.US, "-1_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d_-%s_%s", startTime, endTime, rotationValue, originalWidth, originalHeight, bitrate, resultWidth, resultHeight, originalDuration, framerate, filters, originalPath);
+    }
+
+    private byte[] convertFloatArrayToByteArray(float[] floatArray) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(floatArray.length * (Float.SIZE / Byte.SIZE));
+        for (float value : floatArray) {
+            byteBuffer.putFloat(value);
+        }
+        return byteBuffer.array();
+    }
+
+    private float[] convertByteArrayToFloatArray(byte[] byteArray) {
+        ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
+        float[] floatArray = new float[byteArray.length / (Float.SIZE / Byte.SIZE)];
+        for (int i = 0; i < floatArray.length; i++) {
+            floatArray[i] = byteBuffer.getFloat();
+        }
+        return floatArray;
     }
 
     public boolean parseString(String string) {
@@ -641,6 +791,14 @@ public class VideoEditedInfo {
                                 if (version >= 4) {
                                     cropState.mirrored = serializedData.readBool(false);
                                 }
+
+                                try {
+                                    Matrix m = new Matrix();
+                                    m.setValues(convertByteArrayToFloatArray(serializedData.readByteArray(false)));
+                                    cropState.useMatrix = m;
+                                } catch (Exception e) {
+                                    FileLog.e(e);
+                                }
                             }
                         }
                         if (version >= 6) {
@@ -676,6 +834,16 @@ public class VideoEditedInfo {
                                 }
                             }
                         }
+
+                        has = serializedData.readByte(false);
+                        if (has != 0) {
+                            int count = serializedData.readInt32(false);
+                            mixedSoundInfos = new ArrayList<>(count);
+                            for (int a = 0; a < count; a++) {
+                                mixedSoundInfos.add(new MediaCodecVideoConvertor.MixedSoundInfo(serializedData, false));
+                            }
+                        }
+
                         serializedData.cleanup();
                     }
                 } else {
@@ -712,6 +880,33 @@ public class VideoEditedInfo {
     }
 
     public static class Part extends TLObject {
+
+        @Override
+        public String toString() {
+            return "Part{" +
+                    "flags=" + flags +
+                    ", isVideo=" + isVideo +
+                    ", muted=" + muted +
+                    ", path='" + path + '\'' +
+                    ", volume=" + volume +
+                    ", offset=" + offset +
+                    ", loop=" + loop +
+                    ", left=" + left +
+                    ", right=" + right +
+                    ", width=" + width +
+                    ", height=" + height +
+                    ", duration=" + duration +
+                    ", part=" + part +
+                    ", posBuffer=" + posBuffer +
+                    ", uvBuffer=" + uvBuffer +
+                    ", animatedFileDrawable=" + animatedFileDrawable +
+                    ", currentFrame=" + currentFrame +
+                    ", framesPerDraw=" + framesPerDraw +
+                    ", msPerFrame=" + msPerFrame +
+                    ", surfaceTexture=" + surfaceTexture +
+                    ", player=" + player +
+                    '}';
+        }
 
         public int flags;
         public boolean isVideo;

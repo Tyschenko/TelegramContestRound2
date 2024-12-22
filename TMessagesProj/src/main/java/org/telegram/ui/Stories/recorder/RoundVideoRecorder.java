@@ -34,15 +34,20 @@ public class RoundVideoRecorder extends FrameLayout {
 
     private long recordingStarted = -1;
     private long recordingStopped = -1;
-    public final long MAX_DURATION = 59_500L;
+    public long MAX_DURATION = 59_500L;
 
     private final Paint shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final Runnable stopRunnable = this::stop;
 
-    public RoundVideoRecorder(Context context) {
+    public RoundVideoRecorder(Context context, boolean isFromChat) {
         super(context);
+        if (isFromChat) {
+            MAX_DURATION = Long.MAX_VALUE;
+        } else {
+            MAX_DURATION = 59_500L;
+        }
 
         progressPaint.setStyle(Paint.Style.STROKE);
         progressPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -100,7 +105,9 @@ public class RoundVideoRecorder extends FrameLayout {
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
                 } catch (Exception ignore) {}
 
-                AndroidUtilities.runOnUIThread(stopRunnable, MAX_DURATION);
+                if (MAX_DURATION != Long.MAX_VALUE) {
+                    AndroidUtilities.runOnUIThread(stopRunnable, MAX_DURATION);
+                }
             }, cameraView, true);
         });
         cameraView.initTexture();
@@ -179,7 +186,7 @@ public class RoundVideoRecorder extends FrameLayout {
         }
 
         if (recordingStarted > 0) {
-            float t = Utilities.clamp(sinceRecording() / (float) MAX_DURATION, 1, 0);
+            float t = Utilities.clamp(sinceRecording() % 59_500 / (float) 59_500, 1, 0);
 
             progressPaint.setStrokeWidth(dp(3.33f));
             progressPaint.setColor(Theme.multAlpha(0xbeffffff, alpha));

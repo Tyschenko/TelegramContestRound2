@@ -55,6 +55,121 @@ import java.util.List;
 
 public class StoryEntry {
 
+    @Override
+    public String toString() {
+        return "StoryEntry{" +
+                "currentAccount=" + currentAccount +
+                ", draftId=" + draftId +
+                ", isDraft=" + isDraft +
+                ", draftDate=" + draftDate +
+                ", editStoryPeerId=" + editStoryPeerId +
+                ", editStoryId=" + editStoryId +
+                ", isEdit=" + isEdit +
+                ", isEditSaved=" + isEditSaved +
+                ", fileDuration=" + fileDuration +
+                ", editedMedia=" + editedMedia +
+                ", editedCaption=" + editedCaption +
+                ", editedPrivacy=" + editedPrivacy +
+                ", editedMediaAreas=" + editedMediaAreas +
+                ", isRepost=" + isRepost +
+                ", repostPeerName=" + repostPeerName +
+                ", repostPeer=" + repostPeer +
+                ", repostStoryId=" + repostStoryId +
+                ", repostCaption='" + repostCaption + '\'' +
+                ", repostMedia=" + repostMedia +
+                ", isRepostMessage=" + isRepostMessage +
+                ", messageObjects=" + messageObjects +
+                ", isError=" + isError +
+                ", error=" + error +
+                ", audioPath='" + audioPath + '\'' +
+                ", audioAuthor='" + audioAuthor + '\'' +
+                ", audioTitle='" + audioTitle + '\'' +
+                ", audioDuration=" + audioDuration +
+                ", audioOffset=" + audioOffset +
+                ", audioLeft=" + audioLeft +
+                ", audioRight=" + audioRight +
+                ", audioVolume=" + audioVolume +
+                ", editDocumentId=" + editDocumentId +
+                ", editPhotoId=" + editPhotoId +
+                ", editExpireDate=" + editExpireDate +
+                ", isVideo=" + isVideo +
+                ", file=" + file +
+                ", fileDeletable=" + fileDeletable +
+                ", thumbPath='" + thumbPath + '\'' +
+                ", thumbPathBitmap=" + thumbPathBitmap +
+                ", videoVolume=" + videoVolume +
+                ", orientation=" + orientation +
+                ", invert=" + invert +
+                ", collage=" + collage +
+                ", collageContent=" + collageContent +
+                ", videoLoop=" + videoLoop +
+                ", videoLeft=" + videoLeft +
+                ", videoRight=" + videoRight +
+                ", videoOffset=" + videoOffset +
+                ", muted=" + muted +
+                ", left=" + left +
+                ", right=" + right +
+                ", isEditingCover=" + isEditingCover +
+                ", editingCoverDocument=" + editingCoverDocument +
+                ", updateDocumentRef=" + updateDocumentRef +
+                ", cover=" + cover +
+                ", coverSet=" + coverSet +
+                ", coverBitmap=" + coverBitmap +
+                ", duration=" + duration +
+                ", resultWidth=" + resultWidth +
+                ", resultHeight=" + resultHeight +
+                ", width=" + width +
+                ", height=" + height +
+                ", matrix=" + matrix +
+                ", round=" + round +
+                ", roundThumb='" + roundThumb + '\'' +
+                ", roundDuration=" + roundDuration +
+                ", roundOffset=" + roundOffset +
+                ", roundLeft=" + roundLeft +
+                ", roundRight=" + roundRight +
+                ", roundVolume=" + roundVolume +
+                ", peer=" + peer +
+                ", backgroundDrawable=" + backgroundDrawable +
+                ", isDark=" + isDark +
+                ", backgroundWallpaperPeerId=" + backgroundWallpaperPeerId +
+                ", backgroundWallpaperEmoticon='" + backgroundWallpaperEmoticon + '\'' +
+                ", gradientTopColor=" + gradientTopColor +
+                ", gradientBottomColor=" + gradientBottomColor +
+                ", caption=" + caption +
+                ", captionEntitiesAllowed=" + captionEntitiesAllowed +
+                ", privacy=" + privacy +
+                ", privacyRules=" + privacyRules +
+                ", pinned=" + pinned +
+                ", allowScreenshots=" + allowScreenshots +
+                ", period=" + period +
+                ", botId=" + botId +
+                ", botLang='" + botLang + '\'' +
+                ", editingBotPreview=" + editingBotPreview +
+                ", shareUserIds=" + shareUserIds +
+                ", silent=" + silent +
+                ", scheduleDate=" + scheduleDate +
+                ", blurredVideoThumb=" + blurredVideoThumb +
+                ", uploadThumbFile=" + uploadThumbFile +
+                ", draftThumbFile=" + draftThumbFile +
+                ", paintFile=" + paintFile +
+                ", paintBlurFile=" + paintBlurFile +
+                ", paintEntitiesFile=" + paintEntitiesFile +
+                ", averageDuration=" + averageDuration +
+                ", mediaEntities=" + mediaEntities +
+                ", stickers=" + stickers +
+                ", editStickers=" + editStickers +
+                ", messageFile=" + messageFile +
+                ", messageVideoMaskFile=" + messageVideoMaskFile +
+                ", backgroundFile=" + backgroundFile +
+                ", filterFile=" + filterFile +
+                ", filterState=" + filterState +
+                ", thumbBitmap=" + thumbBitmap +
+                ", fromCamera=" + fromCamera +
+                ", hdrInfo=" + hdrInfo +
+                ", checkStickersReqId=" + checkStickersReqId +
+                '}';
+    }
+
     public final int currentAccount = UserConfig.selectedAccount;
 
     public long draftId;
@@ -183,6 +298,7 @@ public class StoryEntry {
 
     public Bitmap thumbBitmap;
     private boolean fromCamera;
+    public boolean isFromChat;
 
     public boolean wouldBeVideo() {
         return wouldBeVideo(mediaEntities);
@@ -1045,7 +1161,7 @@ public class StoryEntry {
         }
     }
 
-    public static StoryEntry fromVideoShoot(File file, String thumbPath, long duration) {
+    public static StoryEntry fromVideoShoot(File file, String thumbPath, long duration, boolean isFromChat) {
         StoryEntry entry = new StoryEntry();
         entry.fromCamera = true;
         entry.file = file;
@@ -1056,7 +1172,11 @@ public class StoryEntry {
         entry.duration = duration;
         entry.thumbPath = thumbPath;
         entry.left = 0;
-        entry.right = Math.min(1, 59_500f / entry.duration);
+        if (isFromChat) {
+            entry.right = Math.min(1, Long.MAX_VALUE / entry.duration);
+        } else {
+            entry.right = Math.min(1, 59_500f / entry.duration);
+        }
         return entry;
     }
 

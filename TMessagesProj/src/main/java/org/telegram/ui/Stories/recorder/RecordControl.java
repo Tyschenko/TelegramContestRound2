@@ -117,7 +117,7 @@ public class RecordControl extends View implements FlashViews.Invertable {
     private boolean dual;
     private final AnimatedFloat dualT = new AnimatedFloat(this, 0, 330, CubicBezierInterpolator.EASE_OUT_QUINT);
 
-    private static final long MAX_DURATION = 60 * 1000L;
+    private static long MAX_DURATION;
     private long recordingStart;
     private long lastDuration;
 
@@ -126,8 +126,13 @@ public class RecordControl extends View implements FlashViews.Invertable {
     private final Point check2 = new Point(-dpf2(8.5f/3.0f), dpf2(26/3.0f));
     private final Point check3 = new Point(dpf2(29/3.0f), dpf2(-11/3.0f));
 
-    public RecordControl(Context context) {
+    public RecordControl(Context context, boolean isFromChat) {
         super(context);
+        if (isFromChat) {
+            MAX_DURATION = Long.MAX_VALUE;
+        } else {
+            MAX_DURATION = 60 * 1000L;
+        }
 
         setWillNotDraw(false);
 
@@ -434,7 +439,7 @@ public class RecordControl extends View implements FlashViews.Invertable {
 
         long duration = System.currentTimeMillis() - recordingStart;
         float recordEndT = recording ? 0 : 1f - recordingLongT;
-        float sweepAngle = duration / (float) MAX_DURATION * 360;
+        float sweepAngle = (duration % 60_000) / (float) 60_000 * 360;
 
         float recordingLoading = this.recordingLoadingT.set(this.recordingLoading);
 

@@ -59,14 +59,16 @@ public class CaptionStory extends CaptionContainerView {
     public PeriodDrawable periodDrawable;
     private ItemOptions periodPopup;
     private boolean periodVisible = true;
+    private boolean isFromChat = false;
 
     public static final int[] periods = new int[] { 6 * 3600, 12 * 3600, 86400, 2 * 86400 };
     private int periodIndex = 0;
 
     private Drawable flipButton;
 
-    public CaptionStory(Context context, FrameLayout rootView, SizeNotifierFrameLayout sizeNotifierFrameLayout, FrameLayout containerView, Theme.ResourcesProvider resourcesProvider, BlurringShader.BlurManager blurManager) {
+    public CaptionStory(Context context, FrameLayout rootView, SizeNotifierFrameLayout sizeNotifierFrameLayout, FrameLayout containerView, Theme.ResourcesProvider resourcesProvider, BlurringShader.BlurManager blurManager, boolean isFromChat) {
         super(context, rootView, sizeNotifierFrameLayout, containerView, resourcesProvider, blurManager);
+        this.isFromChat = isFromChat;
 
         roundButton = new ImageView(context);
         roundButtonBounce = new ButtonBounce(roundButton);
@@ -618,7 +620,7 @@ public class CaptionStory extends CaptionContainerView {
             setCollapsed(true, Integer.MAX_VALUE);
             invalidateDrawOver2();
 
-            putRecorder(currentRecorder = new RoundVideoRecorder(getContext()) {
+            putRecorder(currentRecorder = new RoundVideoRecorder(getContext(), isFromChat) {
                 @Override
                 protected void receivedAmplitude(double amplitude) {
                     setAmplitude(amplitude);
